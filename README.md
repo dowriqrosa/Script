@@ -1,6 +1,11 @@
 # Comandos windows
 
+## Reinstalar net framework
 
+```sh
+dism /online /enable-feature /featurename:netfx3 /all
+dism /online /enable-feature /featurename:netfx4 /all
+```
 
 ## abrir programa como administrado
 
@@ -146,6 +151,18 @@ netsh advfirewall set allprofiles state off
 schtasks /Change /TN "\Microsoft\Windows\UpdateOrchestrator\Reboot" /disable
 ```
 
+## Gerar hash md5 
+
+```sh
+certutil -hashfile "file" md5
+```
+
+## Instalar driver
+
+```sh
+pnputil /add-driver "*.INF" /install
+```
+
 ## Exporta chave de registro
 
 ```sh
@@ -228,6 +245,12 @@ sc start remoteregistry
 
 ```sh
 takeown /f "pasta" /r /d y
+```
+
+## Adicionar permissão
+
+```sh
+cacls C:\Windows\System32\Macromed\Flash /E /P Todos:F
 ```
 
 ## Redimensionar pasta System volume information
@@ -329,7 +352,9 @@ fsutil behavior set disable8dot3 `f`: 0
 ## Terminar processos de um usuario 
 
 ```sh
-tasklist /S srv /U dom\usu /FI "USERNAME eq dom\usu"
+tasklist /S srv /U dom\usu /FI "USERNAME eq dom\usu" /f
+taskkill /S srv /U dom\usu /FI "USERNAME eq dom\usu" /f
+taskkill /im "cmd*" /f
 ```
 
 ## discpart comandos
@@ -377,13 +402,19 @@ Get-ADUser -SearchBase "OU" -Filter * -Properties PasswordNeverExpires | ? {$_.P
 ```
 
 ## Desabilitar contas de usuarios .ps1
-
+## .ps1
 ```sh
  $patch = Get-Content C:\temp\teste.txt
  
  foreach ($tree in $patch) {
    Disable-ADAccount  -Identity $tree
  }
+```
+## .bat
+```sh
+for /f "tokens=*" %%a in (C:\temp\lista.txt) do (
+    taskkill /S %%a /U domninio\cro /F /FI "USERNAME eq domninio\foret"
+)
 ```
 
 ## atualizar politicas de grupo 
@@ -435,4 +466,21 @@ Search-ADAccount -SearchBase "OU=" -AccountDisabled | Where {$_.DistinguishedNam
 ```sh
 $timespan = New-Timespan -Days 90
 Search-ADAccount -SearchBase "OU=" –UsersOnly –AccountInactive –TimeSpan $timespan | Disable-ADAccount
+```
+
+## Remover registros do windows de cada usuario
+
+```sh
+$patch = reg query HKEY_USERS
+foreach ($tree in $patch) {
+    reg delete "$patch\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v NoDrives /f
+}
+taskkill /im "explorer.exe" /f
+gpupdate /force
+explorer.exe
+```
+## Regedit pasta de desinstalação
+
+```sh
+HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\
 ```
